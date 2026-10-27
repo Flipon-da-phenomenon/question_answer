@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Flashcard Viewer</title>
+    <style>
+        :root {
+            --bg-color: #0b1120;
+            --surface-color: #1e293b;
+            --primary-accent: #93c5fd;
+            --highlight-color: #fdba74;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(147, 197, 253, 0.1);
+        }
+
+        .table-badge {
+            display: inline-block;
+            background-color: rgba(147, 197, 253, 0.1);
+            color: var(--primary-accent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-content {
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .term-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .audio-status {
+            font-size: 0.85rem;
+            color: var(--highlight-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .answer-container {
+            width: 100%;
+            margin-top: 12px;
+            padding: 14px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 10px;
+            border-left: 3px solid var(--highlight-color);
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .answer-container.visible {
+            display: flex;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .answer-text {
+            font-size: 1.2rem;
+            color: var(--primary-accent);
+            font-weight: 500;
+        }
+
+        .answer-audio-btn {
+            background-color: var(--highlight-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.2s;
+        }
+
+        .answer-audio-btn:hover {
+            opacity: 0.9;
+        }
+
+        .answer-audio-btn:hover {
+            opacity: 0.9;
+        }
+
+        .counter {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        /* 4 Control Buttons */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: #334155;
+            color: var(--text-main);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn:hover {
+            background-color: #475569;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-accent);
+            color: var(--bg-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #bfdbfe;
+        }
+
+        .btn-highlight {
+            background-color: var(--highlight-color);
+            color: var(--bg-color);
+        }
+
+        .btn-highlight:hover {
+            background-color: #fde68a;
+        }
+
+        .icon {
+            font-size: 1.1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <!-- Sheet / Table Name Badge -->
+            <div id="tableBadge" class="table-badge">Loading...</div>
+
+        <div class="card-content">
+
+            <h2 id="questionText"></h2>
+
+            <button class="btn btn-primary"
+                    onclick="playQuestionAudio()">
+                🔊 Question Audio
+            </button>
+
+            <br>
+
+            <div class="answer-container visible">
+
+                <div style="font-weight:bold">
+                    Positive Answer
+                </div>
+
+                <div id="positiveAnswerText"
+                    class="answer-text">
+                </div>
+
+                <button class="answer-audio-btn"
+                        onclick="playPositiveAudio()">
+                    🔊 Play Positive Audio
+                </button>
+
+                <hr style="width:100%">
+
+                <div style="font-weight:bold">
+                    Negative Answer
+                </div>
+
+                <div id="negativeAnswerText"
+                    class="answer-text">
+                </div>
+
+                <button class="answer-audio-btn"
+                        onclick="playNegativeAudio()">
+                    🔊 Play Negative Audio
+                </button>
+
+            </div>
+
+        </div>
+
+
+            <!-- Row Counter -->
+            <div id="counterText" class="counter">0 / 0</div>
+
+            <!-- 4 Control Buttons -->
+            <div class="button-grid">
+                <button class="btn" onclick="prevCard()">
+                    <span class="icon">◀</span> Previous
+                </button>
+                <button class="btn" onclick="nextCard()">
+                    <span class="icon">▶</span> Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rows = [];
+        let currentIndex = 0;
+        let tableName = "";
+        let answerVisible = false;
+        let activeAudio = null;
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                if (data.success) {
+                    rows = data.rows;
+                    tableName = data.table_name;
+                    document.getElementById('tableBadge').textContent = `Table: ${tableName}`;
+                    if (rows.length > 0) {
+                        updateCard();
+                    } else {
+                        document.getElementById('questionText').textContent = "Spreadsheet is empty.";
+                    }
+                } else {
+                    alert("Error loading data: " + data.error);
+                }
+            } catch (err) {
+                console.error("Failed to fetch data:", err);
+                document.getElementById('questionText').textContent = "Connection error.";
+            }
+        }
+
+            function updateCard() {
+
+                if (rows.length === 0) return;
+
+                const current = rows[currentIndex];
+
+                document.getElementById("questionText").textContent =
+                    current["question text"];
+
+                document.getElementById("positiveAnswerText").textContent =
+                    current["positive answer"];
+
+                document.getElementById("negativeAnswerText").textContent =
+                    current["negative answer"];
+
+                document.getElementById("counterText").textContent =
+                    `${currentIndex + 1} of ${rows.length}`;
+
+                if (activeAudio) {
+                    activeAudio.pause();
+                    activeAudio = null;
+                }
+            }
+
+        function prevCard() {
+            if (rows.length === 0) return;
+            currentIndex = (currentIndex - 1 + rows.length) % rows.length;
+            updateCard();
+        }
+
+        function nextCard() {
+            if (rows.length === 0) return;
+            currentIndex = (currentIndex + 1) % rows.length;
+            updateCard();
+        }
+
+        function playAudio(url) {
+
+            if (!url) return;
+
+            if (activeAudio) {
+                activeAudio.pause();
+            }
+
+            activeAudio = new Audio(url);
+
+            activeAudio.play().catch(err => {
+                console.error(err);
+            });
+        }
+
+        function playQuestionAudio() {
+
+            const current = rows[currentIndex];
+
+            playAudio(
+                current["question audio"]
+            );
+        }
+
+        function playPositiveAudio() {
+
+            const current = rows[currentIndex];
+
+            playAudio(
+                current["positive answer audio"]
+            );
+        }
+
+        function playNegativeAudio() {
+
+            const current = rows[currentIndex];
+
+            playAudio(
+                current["negative answer audio"]
+            );
+        }
+
+        function nextCard() {
+
+            currentIndex++;
+
+            if (currentIndex >= rows.length) {
+                currentIndex = 0;
+            }
+
+            updateCard();
+        }
+
+        function prevCard() {
+
+            currentIndex--;
+
+            if (currentIndex < 0) {
+                currentIndex = rows.length - 1;
+            }
+
+            updateCard();
+        }
+
+        // Initialize on load
+        fetchData();
+    </script>
+</body>
+</html>
