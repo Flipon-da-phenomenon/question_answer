@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Feliponetica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fp_game.css') }}">
+  </head>
+  <body>
+    <div id="fp-app" class="fp-game" data-fp-theme="duo">
+      <div id="fp-root"></div>
+    </div>
+
+    <script>
+      window.FP = window.FP || {};
+      window.FP.config = {
+        prefix: "{{ config['FP_URL_PREFIX'] }}",
+        apiTablesUrl: "{{ url_for('fp_game.api_tables') }}",
+        apiTableUrlTemplate: "{{ url_for('fp_game.api_table', table_name='__TABLE__') }}",
+        staticBase: "{{ url_for('static', filename='') }}"
+      };
+    </script>
+    <script src="{{ url_for('static', filename='js/fp_state.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fp_api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fp_audio.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fp_video.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fp_render.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fp_navigation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fp_main.js') }}"></script>
+  </body>
+</html>
