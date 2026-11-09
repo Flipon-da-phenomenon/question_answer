@@ -85,7 +85,7 @@ def _get_group_columns(row):
         normalized = normalize_header(column_name)
         if not normalized:
             continue
-        match = re.fullmatch(r"(spanish text|audio|image)(\d+)?", normalized)
+        match = re.fullmatch(r"(spanish text|audio|image|feliponetica)(\d+)?", normalized)
         if not match:
             continue
         field_name = match.group(1)
@@ -99,11 +99,13 @@ def _get_group_columns(row):
         text_value = group.get("spanish text", "")
         audio_value = group.get("audio", "")
         image_value = group.get("image", "")
-        if any(not _is_empty_cell(value) for value in [text_value, audio_value, image_value]):
+        feliponetica_value = group.get("feliponetica", "")
+        if any(not _is_empty_cell(value) for value in [text_value, audio_value, image_value, feliponetica_value]):
             ordered.append({
                 "text": text_value if not _is_empty_cell(text_value) else "",
                 "audio": audio_value if not _is_empty_cell(audio_value) else "",
                 "image": image_value if not _is_empty_cell(image_value) else "",
+                "feliponetica": feliponetica_value if not _is_empty_cell(feliponetica_value) else "",
             })
     return ordered
 

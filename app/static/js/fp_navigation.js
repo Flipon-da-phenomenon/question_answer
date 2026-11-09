@@ -124,7 +124,20 @@
       const card = (phase.cards || []).find((item) => String(item.setId) === String(cardSetId));
       const key = `${tableName}|${phase.phase}|${cardSetId}|${sectionIndex}|${groupIndex}`;
       button.classList.add('is-processing');
-      window.FP.audio.playOnce(url).then(() => {
+      const playback = window.FP.audio.playOnce(url);
+      let feliponetica = '';
+      if (card && sectionIndex === 0 && card.primary) {
+        feliponetica = card.primary.feliponetica || '';
+      } else if (card && card.secondary && card.secondary[groupIndex]) {
+        feliponetica = card.secondary[groupIndex].feliponetica || '';
+      }
+      window.FP.state.dispatch({
+        type: 'REVEAL_AUDIO_TEXT',
+        key: key,
+        text: feliponetica,
+      });
+      window.FP.render.renderApp();
+      playback.then(() => {
         window.FP.state.dispatch({ type: 'AUDIO_PLAYED', key: key });
         button.classList.remove('is-processing');
         button.classList.add('is-complete');

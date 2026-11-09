@@ -48,6 +48,7 @@
         transitionFired: false,
       },
       audioPlayed: {},
+      revealedAudioTexts: {},
       cardsCompleted: {},
       nextCardUnlocked: {},
       phasesCompleted: {},
@@ -110,6 +111,7 @@
     const table = next.activeTable;
     switch (action.type) {
       case 'LOAD_TABLES':
+        next.revealedAudioTexts = {};
         next.tables = action.tables || [];
         next.errors = action.errors || [];
         next.screen = 'menu';
@@ -123,6 +125,7 @@
         return next;
 
       case 'SELECT_TABLE': {
+        next.revealedAudioTexts = {};
         next.activeTable = action.tableName;
         next.tableData = action.tableData;
         next.currentPhaseIndex = 0;
@@ -159,6 +162,7 @@
       }
 
       case 'SHOW_CARDS': {
+        next.revealedAudioTexts = {};
         next.screen = 'cards';
         next.video.active = false;
         next.video.playing = false;
@@ -176,6 +180,7 @@
       }
 
       case 'VIDEO_FINISHED': {
+        next.revealedAudioTexts = {};
         next.screen = 'cards';
         next.video.active = false;
         next.video.playing = false;
@@ -213,6 +218,15 @@
         return updateProgressState(next);
       }
 
+      case 'REVEAL_AUDIO_TEXT': {
+        if (action.key) {
+          next.revealedAudioTexts = Object.assign({}, next.revealedAudioTexts, {
+            [action.key]: action.text || '',
+          });
+        }
+        return next;
+      }
+
       case 'CARD_AUTOCOMPLETE': {
         if (action.cardKey) {
           next.cardsCompleted[action.cardKey] = true;
@@ -221,6 +235,7 @@
       }
 
       case 'ADVANCE_CARD': {
+        next.revealedAudioTexts = {};
         if (!next.tableData) {
           return next;
         }
@@ -241,6 +256,7 @@
       }
 
       case 'ADVANCE_PHASE': {
+        next.revealedAudioTexts = {};
         if (!next.tableData) {
           return next;
         }
@@ -274,6 +290,7 @@
       }
 
       case 'RESET_VIEW_TO_MENU': {
+        next.revealedAudioTexts = {};
         next.screen = 'menu';
         next.activeTable = null;
         next.tableData = null;

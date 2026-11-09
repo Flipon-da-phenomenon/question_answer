@@ -52,8 +52,10 @@ Each worksheet corresponds to a table name. Each row is a card, and the `set id`
 - `spanish text`, `audio`, `image`
 - `spanish text2`, `audio2`, `image2`
 - `spanish text3`, `audio3`, `image3`
+- `feliponetica1`, `feliponetica2`, `feliponetica3`
 
 The parser automatically builds the primary and secondary sections from populated groups and ignores empty values.
+When an audio button is pressed, its matching `feliponeticaN` value appears below the button and stays visible until the card changes.
 
 ## Graceful degradation behaviors
 

@@ -74,13 +74,46 @@ def test_float_set_ids_and_sparse_dynamic_groups_load_cards(tmp_path):
 
     assert phase['cardIds'] == [1, 2, 3]
     assert [card['setId'] for card in phase['cards']] == [1, 2]
-    assert phase['cards'][0]['primary'] == {'text': '', 'audio': audio_url, 'image': ''}
+    assert phase['cards'][0]['primary'] == {'text': '', 'audio': audio_url, 'image': '', 'feliponetica': ''}
     assert phase['cards'][0]['secondary'] == [
-        {'text': 'hola', 'audio': '', 'image': image_url},
+        {'text': 'hola', 'audio': '', 'image': image_url, 'feliponetica': ''},
     ]
-    assert phase['cards'][1]['primary'] == {'text': 'adios', 'audio': '', 'image': image_url}
+    assert phase['cards'][1]['primary'] == {'text': 'adios', 'audio': '', 'image': image_url, 'feliponetica': ''}
     assert phase['cards'][1]['secondary'] == [
-        {'text': '', 'audio': audio_url, 'image': ''},
+        {'text': '', 'audio': audio_url, 'image': '', 'feliponetica': ''},
+    ]
+
+
+def test_feliponetica_columns_stay_matched_to_sparse_group_suffixes(tmp_path):
+    excel_path = tmp_path / 'feliponetica.xlsx'
+    _make_workbook(
+        excel_path,
+        [
+            ['table', 'phase', 'set id range', 'sequence', 'video URL'],
+            ['unit1', 1, '1', 'in order', ''],
+        ],
+        {
+            'unit1': [
+                [
+                    'set id', 'spanish text', 'audio', 'image', 'feliponetica1',
+                    'audio2', 'feliponetica2', 'audio4', 'feliponetica4',
+                ],
+                [
+                    1, 'hola', 'https://example.com/audio1.mp3', '', 'phonetic one',
+                    'https://example.com/audio2.mp3', 'phonetic two',
+                    'https://example.com/audio4.mp3', 'phonetic four',
+                ],
+            ]
+        },
+    )
+
+    payload = build_payload(str(excel_path), cache_ttl=1)
+    card = payload['tables'][0]['phases'][0]['cards'][0]
+
+    assert card['primary']['feliponetica'] == 'phonetic one'
+    assert [group['feliponetica'] for group in card['secondary']] == [
+        'phonetic two',
+        'phonetic four',
     ]
 
 

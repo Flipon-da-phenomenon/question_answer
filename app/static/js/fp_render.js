@@ -18,6 +18,16 @@
     return (phase.cards || []).find((card) => String(card.setId) === String(currentSetId)) || null;
   }
 
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    })[character]);
+  }
+
   function renderMenu() {
     const state = window.FP.state;
     const root = document.getElementById('fp-root');
@@ -83,19 +93,23 @@
   function renderAudioButton(card, tableName, phase, sectionType, sectionIndex, groupIndex, item) {
     const key = `${tableName}|${phase.phase}|${card.setId}|${sectionIndex}|${groupIndex}`;
     const completed = !!window.FP.state.audioPlayed[key];
+    const revealed = window.FP.state.revealedAudioTexts[key];
     const label = sectionType === 'primary' ? `Listen ${groupIndex + 1}` : `Extra ${groupIndex + 1}`;
     return `
-      <button class="fp-audio-button ${completed ? 'is-complete' : ''}"
-        data-fp-action="play-audio"
-        data-fp-audio="${(item && item.audio) || ''}"
-        data-fp-table="${tableName}"
-        data-fp-phase="${phase.phase}"
-        data-fp-set-id="${card.setId}"
-        data-fp-section-index="${sectionIndex}"
-        data-fp-group-index="${groupIndex}"
-        ${!item || !item.audio ? 'disabled' : ''}>
-        ▶ ${label}
-      </button>
+      <div class="fp-audio-control">
+        <button class="fp-audio-button ${completed ? 'is-complete' : ''}"
+          data-fp-action="play-audio"
+          data-fp-audio="${(item && item.audio) || ''}"
+          data-fp-table="${tableName}"
+          data-fp-phase="${phase.phase}"
+          data-fp-set-id="${card.setId}"
+          data-fp-section-index="${sectionIndex}"
+          data-fp-group-index="${groupIndex}"
+          ${!item || !item.audio ? 'disabled' : ''}>
+          ▶ ${label}
+        </button>
+        ${revealed ? `<p class="fp-feliponetica">${escapeHtml(revealed)}</p>` : ''}
+      </div>
     `;
   }
 
